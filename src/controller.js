@@ -5,28 +5,26 @@ class LibrosController {
     try {
       const [result] = await pool.query("SELECT * FROM libros");
       res.json(result);
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      res.status(400).json({ Error: "Ocurrió un error al obtener los libros" });
     }
   }
 
   async getOne(req, res) {
     try {
       const libro = req.body;
-      const id_libro = parseInt(libro.id);
-      const [result] = await pool.query(`select * from libros where id=?`, [
-        id_libro,
+      const [result] = await pool.query(`SELECT * FROM libros WHERE id=?`, [
+        libro.id,
       ]);
-
-      if (result[0] != undefined) {
-        res.json(result);
+      if (result.length > 0) {
+        res.json(result[0]);
       } else {
-        res.json({
+        res.status(404).json({
           Error: "No se ha encontrado un libro con el id especificado",
         });
       }
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      res.status(400).json({ Error: "Ocurrió un error al obtener el libro" });
     }
   }
 
@@ -45,7 +43,7 @@ class LibrosController {
     );
 
     if (atributosExtra.length > 0) {
-      return res.json({
+      return res.status(404).json({
         Error: `Atributos inválidos: ${atributosExtra.join(", ")}`,
       });
     }
@@ -61,12 +59,8 @@ class LibrosController {
         ]
       );
       res.json({ "ID insertado": result.insertId });
-    } catch (e) {
-      console.log(e);
-    } finally {
-      res.json({
-        Error: "No se ha podido agregar el registro",
-      });
+    } catch (error) {
+      res.status(400).json({ Error: "Ocurrió un error al añadir el libro" });
     }
   }
 
@@ -77,13 +71,13 @@ class LibrosController {
         libro.ISBN,
       ]);
       if (result.affectedRows === 0) {
-        res.json({
+        res.status(404).json({
           Error: "No se ha encontrado un libro con el ISBN especificado",
         });
       }
       res.json({ "Registros eliminados": result.affectedRows });
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      res.status(400).json({ Error: "Ocurrió un error al eliminar el libro" });
     }
   }
 
@@ -102,13 +96,13 @@ class LibrosController {
         ]
       );
       if (result.changedRows === 0) {
-        res.json({
+        res.status(404).json({
           Error: "No se ha podido actualizar los campos",
         });
       }
       res.json({ "Registros actualizados": result.changedRows });
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      res.status(400).json({ Error: "Ocurrió un error al editar el libro" });
     }
   }
 }
